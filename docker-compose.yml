@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+
+  # Mongo database
+  db:
+    container_name: mongoDB
+    image: mongo
+    env_file: ./.env
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $MONGODB_USER
+      MONGO_INITDB_ROOT_PASSWORD: $MONGODB_PASSWORD
+      # MONGO_INITDB_DATABASE: nodeBlogDB
+    ports:
+      - $MONGODB_LOCAL_PORT:$MONGODB_DOCKER_PORT
+    volumes:
+      - db:/data/db
+
+  # Blog aplication
+  blog:
+    depends_on:
+      - db
+    container_name: nodeBlog
+    build: .
+    restart: always
+    env_file: ./.env
+    ports:
+      - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
+    environment:
+      - DB_HOST=mongodb
+      - DB_USER=$MONGODB_USER
+      - DB_PASSWORD=$MONGODB_PASSWORD
+      - DB_NAME=$MONGODB_NAME
+      - DB_PORT=$MONGODB_LOCAL_PORT
+    volumes:
+      - .:/usr/src/app
+
+volumes:
+  db:
